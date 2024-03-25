@@ -1,26 +1,45 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState, FC } from 'react';
+import { Admin, DataProvider, Loading, Resource } from 'react-admin';
+import { PollCreate, PollEdit, PollList, PollShow } from './components/Polls';
+import { PollOptionCreate, PollOptionEdit, PollOptionList, PollOptionShow } from './components/PollOptions';
+import buildProvider from './Provider';
 
-function App() {
+const App: FC = () => {
+  const [dataProvider, setDataProvider] = useState<null | DataProvider>(null);
+
+  useEffect(() => {
+    const buildDataProvider = async () => {
+      const reactAdminDataProvider = await buildProvider();
+      setDataProvider(() => ({ ...reactAdminDataProvider }));
+    };
+    buildDataProvider();
+  }, []);
+
+  if (!dataProvider) return <Loading />;
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Admin dataProvider={dataProvider}>
+      <Resource
+        name="poll"
+        options={{ label: 'Polls' }}
+        list={PollList}
+        edit={PollEdit}
+        create={PollCreate}
+        show={PollShow}
+      />
+
+      <Resource
+        name="option"
+        options={{ label: 'Poll Options' }}
+        list={PollOptionList}
+        edit={PollOptionEdit}
+        create={PollOptionCreate}
+        show={PollOptionShow}
+      />
+    </Admin>
   );
-}
+};
 
 export default App;
+
+// const hasuraUrl = "https://pollmama.hasura.app/v1/graphql";
